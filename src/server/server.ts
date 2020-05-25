@@ -6,6 +6,9 @@ import helmet from "helmet";
 import cors from "cors";
 import { config as dotenv } from "dotenv";
 
+// Local
+import IndexRoutes from "../routes/index.routes";
+
 // Initializations
 const PORT = 3000;
 
@@ -32,9 +35,7 @@ export default class Server {
   }
 
   routes() {
-    this.app.get("/home", (req: Request, res: Response, next: NextFunction) => {
-      res.send("Hello Man");
-    });
+    this.app.use("/", IndexRoutes);
   }
 
   start() {
