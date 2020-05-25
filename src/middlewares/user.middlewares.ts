@@ -2,10 +2,9 @@
 import { Request, Response, NextFunction } from "express";
 
 // Local
+import BcryptService from "../services/hashing/bcrypt.service";
 import User from "../models/User";
-import isValidEmail from "../utils/is-valid-email";
-import isValidName from "../utils/is-valid-name";
-import isValidPassword from "../utils/is-valid-password";
+import validator from "../utils/validator";
 import trimData from "../utils/trim-data";
 
 export default class UserMiddlewares {
@@ -21,28 +20,24 @@ export default class UserMiddlewares {
       }
 
       // Getting request body
-      let { name, email, password } = res.locals.HTTPRequest.body;
+      const bodyData = res.locals.HTTPRequest.body;
 
-      // Trim user data
-      name = trimData(name);
-      email = trimData(email);
-      password = trimData(password);
+      // Clean and validate user data
+      const cleanData = trimData(bodyData);
+      const validData = validator(cleanData);
 
-      // Validating the user
-      if (!isValidName(name)) {
-        return reject(Error("Name entered is invalid"));
-      }
+      // Hashing data
+      const hashedEmail = new BcryptService(validData.email).hash();
+      const hashedPassword = new BcryptService(validData.password).hash();
 
-      if (!isValidEmail(email)) {
-        return reject(Error("Email address entered is invalid"));
-      }
-
-      if (!isValidPassword(password)) {
-        return reject(Error("Password entered is invalid"));
-      }
+      const userData = {
+        name: validData.name,
+        email: hashedEmail,
+        password: hashedPassword,
+      };
 
       // Returning user data if its valid
-      return resolve(res.locals.HTTPRequest.body);
+      return resolve(userData);
     })
       .then((userData) => {
         res.locals.userData = userData;
