@@ -8,6 +8,7 @@ import { config as dotenv } from "dotenv";
 
 // Local
 import IndexRoutes from "../routes/index.routes";
+import UserRoutes from "../routes/user.routes";
 
 // Initializations
 const PORT = 3000;
@@ -36,6 +37,7 @@ export default class Server {
 
   routes() {
     this.app.use("/", IndexRoutes);
+    this.app.use("/account", UserRoutes);
   }
 
   start() {
