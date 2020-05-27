@@ -3,6 +3,10 @@
 # Edit at https://www.gitignore.io/?templates=node
 
 ### Node ###
+# Keys
+jwtRS256.key
+jwtRS256.key.pub
+
 # vscode
 .vscode/
 
