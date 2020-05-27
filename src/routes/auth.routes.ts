@@ -13,7 +13,7 @@ const {
   getRequest,
   signUpDataValidation,
   logInDataValidation,
-  requiresToken,
+  requiresAuthorization,
 } = AuthMiddlewares;
 
 class AuthRoutes {
@@ -34,7 +34,7 @@ class AuthRoutes {
     );
 
     this.router.post("/login", getRequest, logInDataValidation);
-    this.router.get("/protected", requiresToken, getProtected);
+    this.router.get("/protected", requiresAuthorization, getProtected);
   }
 }
 

@@ -9,6 +9,7 @@ import { config as dotenv } from "dotenv";
 // Local
 import AuthRoutes from "../routes/auth.routes";
 import IndexRoutes from "../routes/index.routes";
+import PostRoutes from "../routes/post.routes";
 import UserRoutes from "../routes/user.routes";
 
 // Initializations
@@ -39,6 +40,7 @@ export default class Server {
   routes() {
     this.app.use("/account", AuthRoutes);
     this.app.use("/", IndexRoutes);
+    this.app.use("/posts", PostRoutes);
     this.app.use("/user", UserRoutes);
   }
 

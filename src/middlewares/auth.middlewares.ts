@@ -45,10 +45,14 @@ export default class AuthMiddlewares {
       }
 
       // Getting request body
-      const bodyData = res.locals.HTTPRequest.body;
+      const { name, email, password } = res.locals.HTTPRequest.body;
+
+      if (!name || !email || !password) {
+        return reject(Error("There are missing fields"));
+      }
 
       // Clean and validate user data
-      const cleanData = trimData(bodyData);
+      const cleanData = trimData({ name, email, password });
       const validData = validator(cleanData);
 
       // Hashing data
@@ -84,10 +88,14 @@ export default class AuthMiddlewares {
       }
 
       // Getting request body
-      const bodyData = res.locals.HTTPRequest.body;
+      const { email, password } = res.locals.HTTPRequest.body;
+
+      if (!email || !password) {
+        return reject(Error("There are missing fields"));
+      }
 
       // Clean and validate user data
-      const cleanData = trimData(bodyData);
+      const cleanData = trimData({ email, password });
       const validData = validator(cleanData);
 
       // Checking if user exists
@@ -130,7 +138,11 @@ export default class AuthMiddlewares {
       });
   }
 
-  static requiresToken(req: Request, res: Response, next: NextFunction) {
+  static requiresAuthorization(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     new Promise(async (resolve, reject) => {
       const { authorization } = req.headers;
 
