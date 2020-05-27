@@ -1,10 +1,6 @@
 // Third
 import { Router } from "express";
 
-// Local
-import IndexController from "../controllers/index.ctrl";
-import AuthMiddlewares from "../middlewares/auth.middlewares";
-
 class IndexRoutes {
   router: Router;
 
@@ -14,7 +10,7 @@ class IndexRoutes {
   }
 
   routes() {
-    this.router.get("/", IndexController.getIndex);
+    this.router.get("/");
   }
 }
 

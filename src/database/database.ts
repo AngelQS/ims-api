@@ -12,6 +12,7 @@ export default class MakeDatabase {
     mongoose.connect(URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      useCreateIndex: true,
     });
 
     mongoose.connection.on("connected", () => {

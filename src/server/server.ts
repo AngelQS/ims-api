@@ -7,6 +7,7 @@ import cors from "cors";
 import { config as dotenv } from "dotenv";
 
 // Local
+import AuthRoutes from "../routes/auth.routes";
 import IndexRoutes from "../routes/index.routes";
 import UserRoutes from "../routes/user.routes";
 
@@ -36,8 +37,9 @@ export default class Server {
   }
 
   routes() {
+    this.app.use("/account", AuthRoutes);
     this.app.use("/", IndexRoutes);
-    this.app.use("/account", UserRoutes);
+    this.app.use("/user", UserRoutes);
   }
 
   start() {
