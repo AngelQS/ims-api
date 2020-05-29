@@ -4,8 +4,6 @@ import { Request, Response, NextFunction } from "express";
 // Local
 import Post from "../models/Post";
 import trimData from "../utils/trim-data";
-import { accessSync } from "fs";
-import User from "../models/User";
 
 export default class PostMiddlewares {
   static createPost(req: Request, res: Response, next: NextFunction) {

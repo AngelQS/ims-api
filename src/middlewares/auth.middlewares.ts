@@ -1,5 +1,6 @@
 // Third
 import { Request, Response, NextFunction } from "express";
+import { validationResult } from "express-validator";
 
 // Local
 import BcryptService from "../services/hashing/bcrypt.service";
@@ -8,6 +9,11 @@ import validator from "../utils/validator";
 import trimData from "../utils/trim-data";
 import User from "../models/User";
 import JsonWebTokenService from "../services/hashing/jsonwebtoken.service";
+import signUpValidator from "../services/validators/signup-validator";
+
+// Initializations
+const { getErrorFormater: signUpErrorFormater } = signUpValidator;
+const errFormat = signUpErrorFormater();
 
 export default class AuthMiddlewares {
   static getRequest(req: Request, res: Response, next: NextFunction) {
@@ -18,6 +24,22 @@ export default class AuthMiddlewares {
           new Error("Unable to get request on AuthMiddlewares.getRequest")
         );
       }
+
+      const error = validationResult(req)
+        .formatWith(signUpErrorFormater())
+        .mapped();
+      const newError = {
+        error,
+        meta: {
+          path: req.path,
+          method: req.method,
+          ip: req.ip,
+          statusCode: 422,
+          statusMessage: "Invalid body",
+          context: `${AuthMiddlewares.name}.getRequest`,
+        },
+      };
+      console.log("NEW ERROR:", newError);
 
       // Getting request
       const adaptedRequest = adaptRequest(req);

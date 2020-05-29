@@ -6,6 +6,8 @@ import AuthControllers from "../controllers/auth.ctrl";
 import UserMiddlewares from "../middlewares/user.middlewares";
 import AuthMiddlewares from "../middlewares/auth.middlewares";
 
+import signUpValidator from "../services/validators/signup-validator";
+
 // Initializations
 const { redirectTo, getProtected } = AuthControllers;
 const { saveUserOnDatabase } = UserMiddlewares;
@@ -15,6 +17,7 @@ const {
   logInDataValidation,
   requiresAuthorization,
 } = AuthMiddlewares;
+const { getValidationChain: signUpValidationChain } = signUpValidator;
 
 class AuthRoutes {
   router: Router;
@@ -27,10 +30,11 @@ class AuthRoutes {
   routes() {
     this.router.post(
       "/signup",
-      getRequest,
-      signUpDataValidation,
-      saveUserOnDatabase,
-      redirectTo
+      signUpValidationChain(),
+      getRequest
+      //signUpDataValidation,
+      //saveUserOnDatabase,
+      //redirectTo
     );
 
     this.router.post("/login", getRequest, logInDataValidation);
