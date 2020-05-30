@@ -5,8 +5,8 @@ import { Request, Response, NextFunction } from "express";
 import Post from "../models/Post";
 import trimData from "../utils/trim-data";
 
-export default class PostMiddlewares {
-  static createPost(req: Request, res: Response, next: NextFunction) {
+class PostMiddlewares {
+  public createPost(req: Request, res: Response, next: NextFunction) {
     new Promise(async (resolve, reject) => {
       // Handling error if res.locals.HTTPRequest.body is null
       if (!res.locals.HTTPRequest.body) {
@@ -48,7 +48,7 @@ export default class PostMiddlewares {
       });
   }
 
-  static getAllPosts(req: Request, res: Response, next: NextFunction) {
+  public getAllPosts(req: Request, res: Response, next: NextFunction) {
     new Promise(async (resolve, reject) => {
       const posts = await Post.find({}).populate(
         "postedBy",
@@ -71,7 +71,7 @@ export default class PostMiddlewares {
       });
   }
 
-  static getUserOwnPosts(req: Request, res: Response, next: NextFunction) {
+  public getUserOwnPosts(req: Request, res: Response, next: NextFunction) {
     new Promise(async (resolve, reject) => {
       // Handling error if res.locals.userSession is null
       if (!res.locals.userSession) {
@@ -104,3 +104,7 @@ export default class PostMiddlewares {
       });
   }
 }
+
+const postMiddlewares = new PostMiddlewares();
+
+export default postMiddlewares;

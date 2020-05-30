@@ -1,4 +1,8 @@
 // Third
 import { Request, Response, NextFunction } from "express";
 
-export default class IndexControllers {}
+class IndexControllers {}
+
+const indexControllers = new IndexControllers();
+
+export default indexControllers;

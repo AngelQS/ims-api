@@ -4,8 +4,8 @@ import { Request, Response, NextFunction } from "express";
 // Local
 import User from "../models/User";
 
-export default class UserMiddlewares {
-  static saveUserOnDatabase(req: Request, res: Response, next: NextFunction) {
+class UserMiddlewares {
+  public saveUserOnDatabase(req: Request, res: Response, next: NextFunction) {
     new Promise(async (resolve, reject) => {
       // Handling error if res.locals.userData is null
       if (!res.locals.userData) {
@@ -46,3 +46,7 @@ export default class UserMiddlewares {
       });
   }
 }
+
+const userMiddlewares = new UserMiddlewares();
+
+export default userMiddlewares;

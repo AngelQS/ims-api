@@ -1,4 +1,8 @@
 // Third
 import { Request, Response, NextFunction } from "express";
 
-export default class UserControllers {}
+class UserControllers {}
+
+const userControllers = new UserControllers();
+
+export default userControllers;
