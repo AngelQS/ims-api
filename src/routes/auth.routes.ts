@@ -10,11 +10,9 @@ import signUpValidator from "../services/validators/signup-validator";
 
 // Initializations
 const { redirectTo, getProtected } = AuthControllers;
-const { saveUserOnDatabase } = UserMiddlewares;
 const {
-  getRequest,
-  signUpDataValidation,
-  logInDataValidation,
+  grantUserSignUp,
+  grantUserLogIn,
   requiresAuthorization,
 } = AuthMiddlewares;
 const { getValidationChain: signUpValidationChain } = signUpValidator;
@@ -31,13 +29,11 @@ class AuthRoutes {
     this.router.post(
       "/signup",
       signUpValidationChain(),
-      getRequest
-      //signUpDataValidation,
-      //saveUserOnDatabase,
-      //redirectTo
+      grantUserSignUp,
+      redirectTo
     );
 
-    this.router.post("/login", getRequest, logInDataValidation);
+    this.router.post("/login", grantUserLogIn);
     this.router.get("/protected", requiresAuthorization, getProtected);
   }
 }

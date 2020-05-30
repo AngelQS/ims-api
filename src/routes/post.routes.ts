@@ -6,7 +6,7 @@ import AuthMiddlewares from "../middlewares/auth.middlewares";
 import PostMiddlewares from "../middlewares/post.middlewares";
 
 // Initializations
-const { getRequest, requiresAuthorization } = AuthMiddlewares;
+const { requiresAuthorization } = AuthMiddlewares;
 const { createPost, getAllPosts, getUserOwnPosts } = PostMiddlewares;
 
 class PostRoutes {
@@ -19,7 +19,7 @@ class PostRoutes {
 
   routes() {
     this.router.get("/", requiresAuthorization, getAllPosts);
-    this.router.post("/", getRequest, requiresAuthorization, createPost);
+    this.router.post("/", requiresAuthorization, createPost);
     this.router.get("/myposts", requiresAuthorization, getUserOwnPosts);
   }
 }

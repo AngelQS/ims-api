@@ -14,123 +14,74 @@ import signUpValidator from "../services/validators/signup-validator";
 // Initializations
 const { getErrorFormater: signUpErrorFormater } = signUpValidator;
 
+/* const error = validationResult(req)
+  .formatWith(signUpErrorFormater())
+  .mapped();
+const newError = {
+  error,
+  meta: {
+    path: req.path,
+    method: req.method,
+    ip: req.ip,
+    statusCode: 422,
+    statusMessage: "Invalid body",
+    context: `${AuthMiddlewares.name}.getRequest`,
+  },
+};
+console.log("NEW ERROR:", newError); */
+
 class AuthMiddlewares {
-  public getRequest(req: Request, res: Response, next: NextFunction) {
+  public grantUserSignUp(req: Request, res: Response, next: NextFunction) {
     new Promise(async (resolve, reject) => {
-      // Handling error if request does not exist
-      if (!req) {
-        return reject(
-          new Error("Unable to get request on AuthMiddlewares.getRequest")
-        );
+      // Getting user data from HTTPRequest
+      const { firstname, lastname, username, email, password } = req.body;
+
+      // Verifying if user exists
+      const userExists = await User.exists({ email });
+
+      // Throwing error if user already exists
+      if (userExists) {
+        return reject(Error("Email entered is already taken"));
       }
 
-      const error = validationResult(req)
-        .formatWith(signUpErrorFormater())
-        .mapped();
-      const newError = {
-        error,
-        meta: {
-          path: req.path,
-          method: req.method,
-          ip: req.ip,
-          statusCode: 422,
-          statusMessage: "Invalid body",
-          context: `${AuthMiddlewares.name}.getRequest`,
-        },
-      };
-      console.log("NEW ERROR:", newError);
+      // Saving user
+      const newUser = await new User({
+        firstname,
+        lastname,
+        username,
+        email,
+        password,
+      });
 
-      // Getting request
-      const adaptedRequest = adaptRequest(req);
+      await newUser.save({});
 
-      return resolve(adaptedRequest);
+      return resolve();
     })
-      .then((adaptedRequest): any => {
-        res.locals.HTTPRequest = adaptedRequest;
-        return next();
+      .then(() => {
+        res.locals.redirectTo = "login";
       })
       .catch((err) => {
         console.log(err);
       });
   }
 
-  public signUpDataValidation(req: Request, res: Response, next: NextFunction) {
-    new Promise(async (resolve, reject) => {
-      // Handling error if res.locals.HTTPRequest.body is null
-      if (!res.locals.HTTPRequest.body) {
-        return reject(
-          new Error(
-            "Unable to get res.locals.HTTPRequest.body on UserMiddlewares.signUpDataValidation"
-          )
-        );
-      }
-
+  public grantUserLogIn(req: Request, res: Response, next: NextFunction) {
+    new Promise(async (resolve: Function, reject: Function) => {
       // Getting request body
-      const { name, email, password } = res.locals.HTTPRequest.body;
-
-      if (!name || !email || !password) {
-        return reject(Error("There are missing fields"));
-      }
-
-      // Clean and validate user data
-      const cleanData = trimData({ name, email, password });
-      const validData = validator(cleanData);
-
-      // Hashing data
-      const hashedPassword = await new BcryptService(validData.password).hash();
-
-      const userData = {
-        name: validData.name,
-        email: validData.email,
-        password: hashedPassword,
-      };
-
-      // Returning user data if its valid
-      return resolve(userData);
-    })
-      .then((userData) => {
-        res.locals.userData = userData;
-        return next();
-      })
-      .catch((err) => {
-        return next(err);
-      });
-  }
-
-  public logInDataValidation(req: Request, res: Response, next: NextFunction) {
-    new Promise(async (resolve, reject) => {
-      // Handling error if res.locals.HTTPRequest.body is null
-      if (!res.locals.HTTPRequest.body) {
-        return reject(
-          new Error(
-            "Unable to get res.locals.HTTPRequest.body on UserMiddlewares.signUpDataValidation"
-          )
-        );
-      }
-
-      // Getting request body
-      const { email, password } = res.locals.HTTPRequest.body;
-
-      if (!email || !password) {
-        return reject(Error("There are missing fields"));
-      }
-
-      // Clean and validate user data
-      const cleanData = trimData({ email, password });
-      const validData = validator(cleanData);
+      const { email, password } = req.body;
 
       // Checking if user exists
-      const user = await User.findOne({ email: validData.email });
+      const user = await User.findOne({ email });
 
       if (!user) {
-        return reject(Error("Invalid user email"));
+        return reject(Error("Email entered does not exist"));
       }
 
       const userPassword = user.get("password");
 
       // Checking data
       const validPassword = await new BcryptService(
-        validData.password,
+        password,
         userPassword
       ).compare();
 
