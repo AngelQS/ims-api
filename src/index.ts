@@ -2,11 +2,14 @@
 import Server from "./server/server";
 import Database from "./database/database";
 
-try {
-  const server = new Server();
-  server.start();
-  const database = new Database();
-  database.start();
-} catch (err) {
-  throw new Error("Unable to running server");
+async function init() {
+  try {
+    console.log("first server");
+    await Server.start();
+    await Database.start();
+  } catch (err) {
+    throw new Error("Unable to running server");
+  }
 }
+
+init();

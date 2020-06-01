@@ -5,11 +5,11 @@ import mongoose from "mongoose";
 import EnvironmentVariables from "../config/environment-variables";
 
 // Initializations
-const URI: string = EnvironmentVariables.MONGODB_URI;
-
-export default class MakeDatabase {
+const { MONGODB_URI: URI } = EnvironmentVariables;
+console.log("THE URI:", URI);
+class MakeDatabase {
   start() {
-    mongoose.connect(URI, {
+    mongoose.connect(`${URI}`, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useCreateIndex: true,
@@ -24,3 +24,7 @@ export default class MakeDatabase {
     });
   }
 }
+
+const database = new MakeDatabase();
+
+export default database;

@@ -3,19 +3,19 @@ import { Router } from "express";
 
 // Local
 import AuthControllers from "../controllers/auth.ctrl";
-import UserMiddlewares from "../middlewares/user.middlewares";
 import AuthMiddlewares from "../middlewares/auth.middlewares";
-
 import signUpValidator from "../services/validators/signup-validator";
+import logInValidator from "../services/validators/login-validator";
 
 // Initializations
-const { redirectTo, getProtected } = AuthControllers;
+const { getProtected } = AuthControllers;
 const {
   grantUserSignUp,
   grantUserLogIn,
   requiresAuthorization,
 } = AuthMiddlewares;
 const { getValidationChain: signUpValidationChain } = signUpValidator;
+const { getValidationChain: logInValidationChain } = logInValidator;
 
 class AuthRoutes {
   router: Router;
@@ -26,14 +26,9 @@ class AuthRoutes {
   }
 
   routes() {
-    this.router.post(
-      "/signup",
-      signUpValidationChain(),
-      grantUserSignUp,
-      redirectTo
-    );
+    this.router.post("/signup", signUpValidationChain(), grantUserSignUp);
 
-    this.router.post("/login", grantUserLogIn);
+    this.router.post("/login", logInValidationChain(), grantUserLogIn);
     this.router.get("/protected", requiresAuthorization, getProtected);
   }
 }

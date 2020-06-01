@@ -1,28 +1,27 @@
 // Third
-import express, { Application, Request, Response, NextFunction } from "express";
+import express, { Application } from "express";
 import morgan from "morgan";
 import compression from "compression";
 import helmet from "helmet";
 import cors from "cors";
-import { config as dotenv } from "dotenv";
 
 // Local
+import EnvironmentVariables from "../config/environment-variables";
 import AuthRoutes from "../routes/auth.routes";
 import IndexRoutes from "../routes/index.routes";
 import PostRoutes from "../routes/post.routes";
 import UserRoutes from "../routes/user.routes";
 
 // Initializations
-const PORT = 3000;
+const { NODE_PORT: PORT } = EnvironmentVariables;
 
-export default class Server {
+class Server {
   public app: Application;
 
   constructor() {
     this.app = express();
     this.config();
     this.routes();
-    dotenv();
   }
 
   protected config(): void {
@@ -50,3 +49,7 @@ export default class Server {
     });
   }
 }
+
+const server = new Server();
+
+export default server;

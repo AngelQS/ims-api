@@ -1,37 +1,9 @@
 // Third
 import { body, ValidationError } from "express-validator";
 
-class SignUpValidator {
+class LogInValidator {
   public getValidationChain() {
     return [
-      body(["firstname", "lastname"])
-        .exists({ checkNull: true, checkFalsy: true })
-        .withMessage("Names are required files")
-        .isString()
-        .withMessage("Names fields only must contain alphabetic characters")
-        .trim()
-        .not()
-        .isEmpty({ ignore_whitespace: true })
-        .withMessage("Names fields must not be empty")
-        .isLength({ min: 2 })
-        .withMessage("Names fields must be at least 2 characters")
-        .isLength({ max: 50 })
-        .withMessage("Names fields must be at max 30 characters"),
-
-      body("username")
-        .exists({ checkNull: true, checkFalsy: true })
-        .withMessage("Username is a required field")
-        .isAlphanumeric("sr-RS@latin")
-        .withMessage("Username field only must contain alphanumeric characters")
-        .trim()
-        .not()
-        .isEmpty({ ignore_whitespace: true })
-        .withMessage("Username field must not be empty")
-        .isLength({ min: 2 })
-        .withMessage("Username field must be at least 2 characters")
-        .isLength({ max: 30 })
-        .withMessage("Username field must be at max 30 characters"),
-
       body("email")
         .exists({ checkNull: true, checkFalsy: true })
         .withMessage("Email is a required field")
@@ -66,9 +38,7 @@ class SignUpValidator {
         .matches(/([A-Z]){1,}/)
         .withMessage(
           "Password field must contain at least 1 uppercase alphabetic character"
-        )
-        .custom((value, { req }) => value === req.body.passwordConfirmation)
-        .withMessage("Passwords must match"),
+        ),
     ];
   }
 
@@ -76,7 +46,7 @@ class SignUpValidator {
     return function (error: ValidationError) {
       return {
         type: "CE",
-        name: "Signup Failure",
+        name: "Login failure",
         location: error.location,
         message: error.msg,
         param: error.param,
@@ -88,6 +58,6 @@ class SignUpValidator {
   }
 }
 
-const signUpValidator = new SignUpValidator();
+const logInValidator = new LogInValidator();
 
-export default signUpValidator;
+export default logInValidator;

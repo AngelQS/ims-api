@@ -4,9 +4,6 @@ import { validationResult } from "express-validator";
 
 // Local
 import BcryptService from "../services/hashing/bcrypt.service";
-import adaptRequest from "../utils/adapt-request";
-import validator from "../utils/validator";
-import trimData from "../utils/trim-data";
 import User from "../models/User";
 import JsonWebTokenService from "../services/hashing/jsonwebtoken.service";
 import signUpValidator from "../services/validators/signup-validator";
@@ -31,83 +28,73 @@ const newError = {
 console.log("NEW ERROR:", newError); */
 
 class AuthMiddlewares {
-  public grantUserSignUp(req: Request, res: Response, next: NextFunction) {
-    new Promise(async (resolve, reject) => {
-      // Getting user data from HTTPRequest
-      const { firstname, lastname, username, email, password } = req.body;
+  public async grantUserSignUp(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const validationErrors = validationResult(req)
+        .formatWith(signUpErrorFormater)
+        .mapped();
 
-      // Verifying if user exists
-      const userExists = await User.exists({ email });
+      if (validationErrors) {
+        return Error("Validation Errors");
+      }
 
-      // Throwing error if user already exists
+      const { userData } = req.body;
+
+      const userExists = await User.exists({ email: userData.email });
+
       if (userExists) {
-        return reject(Error("Email entered is already taken"));
+        return Error("Email entered is already taken");
       }
 
       // Saving user
-      const newUser = await new User({
-        firstname,
-        lastname,
-        username,
-        email,
-        password,
-      });
+      const newUser = await new User(userData);
 
-      await newUser.save({});
+      await newUser.save();
 
-      return resolve();
-    })
-      .then(() => {
-        res.locals.redirectTo = "login";
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+      return next();
+    } catch (err) {
+      return next(err);
+    }
   }
 
-  public grantUserLogIn(req: Request, res: Response, next: NextFunction) {
-    new Promise(async (resolve: Function, reject: Function) => {
-      // Getting request body
+  public async grantUserLogIn(req: Request, res: Response, next: NextFunction) {
+    try {
       const { email, password } = req.body;
 
-      // Checking if user exists
       const user = await User.findOne({ email });
 
       if (!user) {
-        return reject(Error("Email entered does not exist"));
+        return Error("Email entered does not exist");
       }
 
       const userPassword = user.get("password");
 
-      // Checking data
       const validPassword = await new BcryptService(
         password,
         userPassword
       ).compare();
 
       if (!validPassword) {
-        return reject(Error("Invalid user password"));
+        return Error("Invalid user password");
       }
 
-      // User payload
       const userPayload = {
         _id: user.get("_id"),
         email: user.get("email"),
       };
 
-      // Generating token
       const userToken = await JsonWebTokenService.sign(userPayload);
 
-      return resolve(userToken);
-    })
-      .then((userToken) => {
-        res.json({ message: "Successfully loged in", token: userToken });
-        return next();
-      })
-      .catch((err) => {
-        res.json({ message: `${err}` });
-        return next(err);
-      });
+      res.json({ message: "Successfully loged in", token: userToken });
+      return next();
+    } catch (err) {
+      res.json({ message: `${err}` });
+      return next(err);
+    }
   }
 
   public requiresAuthorization(
@@ -141,7 +128,7 @@ class AuthMiddlewares {
       return resolve(user);
     })
       .then((user) => {
-        res.locals.userSession = user;
+        res.locals.dataBearer.user = user;
         return next();
       })
       .catch((err) => {
