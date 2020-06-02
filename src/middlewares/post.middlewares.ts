@@ -1,19 +1,33 @@
 // Third
 import { Request, Response, NextFunction } from "express";
+import { validationResult } from "express-validator";
 
 // Local
 import Post from "../models/Post";
+import PostValidator from "../services/validators/post-validator";
+
+// Initializations
+const { getErrorFormater: postErrorFormater } = PostValidator;
 
 class PostMiddlewares {
   public async createPost(req: Request, res: Response, next: NextFunction) {
     try {
+      const errors = validationResult(req)
+        .formatWith(postErrorFormater())
+        .array({ onlyFirstError: true });
+
+      if (errors.length > 0) {
+        console.log("ERRORS:", errors[0]);
+        throw new Error("Validation Errors");
+      }
+
       if (!res.locals.bearer.user) {
         return Error(
           "Unable to get res.locals.bearer.user on PostMiddlewares.createPost"
         );
       }
 
-      const { postData } = req.body;
+      const postData = req.body;
 
       res.locals.bearer.user.password = undefined;
 

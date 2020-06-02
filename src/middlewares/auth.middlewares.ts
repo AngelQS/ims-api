@@ -6,26 +6,12 @@ import { validationResult } from "express-validator";
 import BcryptService from "../services/hashing/bcrypt.service";
 import User from "../models/User";
 import JsonWebTokenService from "../services/hashing/jsonwebtoken.service";
-import signUpValidator from "../services/validators/signup-validator";
+import SignUpValidator from "../services/validators/signup-validator";
+import LogInValidator from "../services/validators/login-validator";
 
 // Initializations
-const { getErrorFormater: signUpErrorFormater } = signUpValidator;
-
-/* const error = validationResult(req)
-  .formatWith(signUpErrorFormater())
-  .mapped();
-const newError = {
-  error,
-  meta: {
-    path: req.path,
-    method: req.method,
-    ip: req.ip,
-    statusCode: 422,
-    statusMessage: "Invalid body",
-    context: `${AuthMiddlewares.name}.getRequest`,
-  },
-};
-console.log("NEW ERROR:", newError); */
+const { getErrorFormater: signUpErrorFormater } = SignUpValidator;
+const { getErrorFormater: logInErrorFormater } = LogInValidator;
 
 class AuthMiddlewares {
   public async grantUserSignUp(
@@ -65,11 +51,12 @@ class AuthMiddlewares {
 
   public async grantUserLogIn(req: Request, res: Response, next: NextFunction) {
     try {
-      console.log("HI");
-      const errors = validationResult(req).array({ onlyFirstError: true });
+      const errors = validationResult(req)
+        .formatWith(logInErrorFormater())
+        .array({ onlyFirstError: true });
 
-      console.log("ERRORS:", errors);
       if (errors.length > 0) {
+        console.log("ERRORS:", errors);
         throw new Error("Validation Errors");
       }
 
@@ -82,20 +69,20 @@ class AuthMiddlewares {
       }
 
       const userPassword = user.get("password");
-      console.log("antes bcrypt");
+
       const validPassword = await BcryptService.compare(password, userPassword);
-      console.log("despues bcrypt");
+
       if (!validPassword) {
         throw new Error("Invalid user password");
       }
-      console.log("PASO IF");
+
       const userPayload = {
         _id: user.get("_id"),
         email: user.get("email"),
       };
-      console.log("payload:", userPayload);
+
       const userToken = await JsonWebTokenService.sign(userPayload);
-      console.log("userToken:", userToken);
+
       return res.json({ message: "Successfully loged in", token: userToken });
     } catch (err) {
       res.json({ message: `${err}` });
