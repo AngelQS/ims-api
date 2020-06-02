@@ -46,6 +46,10 @@ class PostValidator {
       return {
         type: "CE",
         name: "Post Creation Failure",
+        status: {
+          code: null,
+          message: null,
+        },
         location: error.location,
         message: error.msg,
         param: error.param,

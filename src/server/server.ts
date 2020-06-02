@@ -1,5 +1,5 @@
 // Third
-import express, { Application } from "express";
+import express, { Application, Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import compression from "compression";
 import helmet from "helmet";
@@ -26,6 +26,12 @@ class Server {
 
   protected config(): void {
     this.app.set("port", PORT);
+
+    // Global variables
+    this.app.use((req: Request, res: Response, next: NextFunction) => {
+      res.locals.bearer = {}; // Transfer data bearer
+      return next();
+    });
 
     // Middlewares
     this.app.use(express.urlencoded({ extended: false }));

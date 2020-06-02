@@ -1,5 +1,5 @@
 // Third
-import { body, ValidationError } from "express-validator";
+import { body, ValidationError, validationResult } from "express-validator";
 
 class SignUpValidator {
   public getValidationChain() {
@@ -13,6 +13,8 @@ class SignUpValidator {
         .not()
         .isEmpty({ ignore_whitespace: true })
         .withMessage("Names fields must not be empty")
+        .matches(/[a-zA-Z]/)
+        .withMessage("Names fields only must contain alphabetic characters")
         .isLength({ min: 2 })
         .withMessage("Names fields must be at least 2 characters")
         .isLength({ max: 50 })
@@ -77,6 +79,10 @@ class SignUpValidator {
       return {
         type: "CE",
         name: "Signup Failure",
+        status: {
+          code: null,
+          message: null,
+        },
         location: error.location,
         message: error.msg,
         param: error.param,
@@ -87,6 +93,28 @@ class SignUpValidator {
     };
   }
 }
+
+/* formatter: (error) => {
+        return {
+  type: "CE",
+  name: "Signup Failure",
+  location: error.location,
+  message: error.msg,
+  param: error.param,
+  value: error.value,
+  nestedErrors: error.nestedErrors, */
+
+/* function s(error: ValidationError) {
+      return {
+        type: "CE",
+        name: "Signup Failure",
+        location: error.location,
+        message: error.msg,
+        param: error.param,
+        value: error.value,
+        nestedErrors: error.nestedErrors,
+        context: null,
+      }; */
 
 const signUpValidator = new SignUpValidator();
 

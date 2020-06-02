@@ -15,12 +15,16 @@ const privateKey = fs.readFileSync(
   "utf8"
 ); // get private key
 
-export default class JsonWebTokenService {
-  static async sign(payload: object): Promise<string> {
+class JsonWebTokenService {
+  public async sign(payload: object): Promise<string> {
     return await jwt.sign(payload, privateKey, { algorithm: "RS256" });
   }
 
-  static async verify(token: string): Promise<any> {
+  public async verify(token: string): Promise<any> {
     return await jwt.verify(token, publicKey);
   }
 }
+
+const jsonWebTokenService = new JsonWebTokenService();
+
+export default jsonWebTokenService;

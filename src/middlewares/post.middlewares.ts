@@ -7,17 +7,17 @@ import Post from "../models/Post";
 class PostMiddlewares {
   public async createPost(req: Request, res: Response, next: NextFunction) {
     try {
-      if (!res.locals.dataBearer.user) {
+      if (!res.locals.bearer.user) {
         return Error(
-          "Unable to get res.locals.dataBearer.user on PostMiddlewares.createPost"
+          "Unable to get res.locals.bearer.user on PostMiddlewares.createPost"
         );
       }
 
       const { postData } = req.body;
 
-      res.locals.dataBearer.user.password = undefined;
+      res.locals.bearer.user.password = undefined;
 
-      postData.postedBy = res.locals.dataBearer.user;
+      postData.postedBy = res.locals.bearer.user;
 
       const newPost = await new Post(postData);
 
@@ -53,13 +53,13 @@ class PostMiddlewares {
     next: NextFunction
   ) {
     try {
-      if (!res.locals.dataBearer.user) {
+      if (!res.locals.bearer.user) {
         return Error(
-          "Unable to get res.locals.dataBearer.user on PostMiddlewares.getUserOwnPosts"
+          "Unable to get res.locals.bearer.user on PostMiddlewares.getUserOwnPosts"
         );
       }
 
-      const { _id } = res.locals.dataBearer.user;
+      const { _id } = res.locals.bearer.user;
 
       const userOwnPosts = await Post.find({ postedBy: _id }).populate(
         "postedBy",

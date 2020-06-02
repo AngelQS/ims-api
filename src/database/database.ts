@@ -6,7 +6,7 @@ import EnvironmentVariables from "../config/environment-variables";
 
 // Initializations
 const { MONGODB_URI: URI } = EnvironmentVariables;
-console.log("THE URI:", URI);
+
 class MakeDatabase {
   start() {
     mongoose.connect(`${URI}`, {

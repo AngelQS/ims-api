@@ -46,7 +46,11 @@ class LogInValidator {
     return function (error: ValidationError) {
       return {
         type: "CE",
-        name: "Login failure",
+        name: "Login Failure",
+        status: {
+          code: null,
+          message: null,
+        },
         location: error.location,
         message: error.msg,
         param: error.param,

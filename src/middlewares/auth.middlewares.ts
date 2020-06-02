@@ -34,28 +34,30 @@ class AuthMiddlewares {
     next: NextFunction
   ) {
     try {
-      const validationErrors = validationResult(req)
-        .formatWith(signUpErrorFormater)
-        .mapped();
-
-      if (validationErrors) {
-        return Error("Validation Errors");
+      const errors = validationResult(req)
+        .formatWith(signUpErrorFormater())
+        .array({ onlyFirstError: true });
+      if (errors.length > 0) {
+        console.log("ERRORS:", errors[0]);
+        throw new Error("Validation Errors");
       }
 
-      const { userData } = req.body;
+      const userData = req.body;
 
       const userExists = await User.exists({ email: userData.email });
 
       if (userExists) {
-        return Error("Email entered is already taken");
+        throw new Error("Email entered is already taken");
       }
+      console.log("hashing");
+      const passwordHashed = BcryptService.hash(userData.password);
+      console.log("hashed");
+      userData.password = passwordHashed;
 
-      // Saving user
-      const newUser = await new User(userData);
+      const newUser = new User(userData);
 
       await newUser.save();
-
-      return next();
+      return res.json({ message: "Successfully signed up", user: newUser });
     } catch (err) {
       return next(err);
     }
@@ -63,48 +65,52 @@ class AuthMiddlewares {
 
   public async grantUserLogIn(req: Request, res: Response, next: NextFunction) {
     try {
+      console.log("HI");
+      const errors = validationResult(req).array({ onlyFirstError: true });
+
+      console.log("ERRORS:", errors);
+      if (errors.length > 0) {
+        throw new Error("Validation Errors");
+      }
+
       const { email, password } = req.body;
 
       const user = await User.findOne({ email });
 
       if (!user) {
-        return Error("Email entered does not exist");
+        throw new Error("Email entered does not exist");
       }
 
       const userPassword = user.get("password");
-
-      const validPassword = await new BcryptService(
-        password,
-        userPassword
-      ).compare();
-
+      console.log("antes bcrypt");
+      const validPassword = await BcryptService.compare(password, userPassword);
+      console.log("despues bcrypt");
       if (!validPassword) {
-        return Error("Invalid user password");
+        throw new Error("Invalid user password");
       }
-
+      console.log("PASO IF");
       const userPayload = {
         _id: user.get("_id"),
         email: user.get("email"),
       };
-
+      console.log("payload:", userPayload);
       const userToken = await JsonWebTokenService.sign(userPayload);
-
-      res.json({ message: "Successfully loged in", token: userToken });
-      return next();
+      console.log("userToken:", userToken);
+      return res.json({ message: "Successfully loged in", token: userToken });
     } catch (err) {
       res.json({ message: `${err}` });
       return next(err);
     }
   }
 
-  public requiresAuthorization(
+  public async requiresAuthorization(
     req: Request,
     res: Response,
     next: NextFunction
   ) {
-    new Promise(async (resolve, reject) => {
+    try {
       const { authorization } = req.headers;
-
+      console.log("authorization:", authorization);
       if (!authorization) {
         return res.status(401).json({ error: "You must be logged in" });
       }
@@ -118,22 +124,19 @@ class AuthMiddlewares {
       }
 
       const { _id } = decoded;
-
+      console.log("_id:", _id);
       const user = await User.findById(_id);
 
       if (!user) {
         return res.json({ error: "User not found" });
       }
-
-      return resolve(user);
-    })
-      .then((user) => {
-        res.locals.dataBearer.user = user;
-        return next();
-      })
-      .catch((err) => {
-        return next(err);
-      });
+      console.log("user:", user);
+      res.locals.bearer.user = user;
+      console.log("res.locals.bearer.user:", res.locals.bearer.user);
+      return next();
+    } catch (err) {
+      return next(err);
+    }
   }
 }
 
