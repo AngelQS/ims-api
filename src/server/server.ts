@@ -1,9 +1,11 @@
 // Third
 import express, { Application, Request, Response, NextFunction } from "express";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 import compression from "compression";
 import helmet from "helmet";
 import cors from "cors";
+import { v4 as uuidv4 } from "uuid";
 
 // Local
 import EnvironmentVariables from "../config/environment-variables";
@@ -34,7 +36,13 @@ class Server {
     });
 
     // Middlewares
+    this.app.use((req: Request, res: Response, next: NextFunction) => {
+      res.cookie("X-Request-Id", uuidv4());
+      res.setHeader("X-Request-Date", Date.now().toString());
+      return next();
+    });
     this.app.use(express.urlencoded({ extended: false }));
+    this.app.use(cookieParser());
     this.app.use(express.json());
     this.app.use(morgan("dev"));
     this.app.use(compression());
