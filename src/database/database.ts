@@ -2,7 +2,7 @@
 import mongoose from "mongoose";
 
 // Local
-import EnvironmentVariables from "../config/environment-variables";
+import EnvironmentVariables from "../services/config/environment-variables";
 
 // Initializations
 const { MONGODB_URI: URI } = EnvironmentVariables;

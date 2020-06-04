@@ -36,7 +36,7 @@ export default class ErrorCourier extends Error {
       },
       errorIat: errorBody.errorIat,
       nestedErrors: errorBody.nestedErrors,
-      stack: this.stack,
+      stack: errorBody.stack,
     };
   }
 

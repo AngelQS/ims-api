@@ -28,9 +28,9 @@ class AuthMiddlewares {
         const errorCourier = new ErrorCourier("Invalid Signup", {
           request: {
             id: req.cookies["X-Request-Id"],
-            iat: res.getHeader("X-Request-Date"),
+            iat: res.getHeader("X-Request-Date") as string,
           },
-          session: undefined,
+          session: null,
           type: "Client Error",
           severity: "Alarm",
           message: "Validation Error",
@@ -48,12 +48,12 @@ class AuthMiddlewares {
             path: __dirname,
           },
           headers: {
-            contentType: req.headers["content-type"],
-            userAgent: req.headers["user-agent"],
+            contentType: req.headers["content-type"] as string,
+            userAgent: req.headers["user-agent"] as string,
           },
           errorIat: new Date().toISOString(),
-          nestedErrors: { errors },
-          stack: undefined,
+          nestedErrors: errors[0],
+          stack: null,
         });
         return next(errorCourier);
       }
@@ -89,9 +89,9 @@ class AuthMiddlewares {
         const errorCourier = new ErrorCourier("Invalid Login", {
           request: {
             id: req.cookies["X-Request-Id"],
-            iat: res.getHeader("X-Request-Date"),
+            iat: res.getHeader("X-Request-Date") as string,
           },
-          session: undefined,
+          session: null,
           type: "Client Error",
           severity: "Alarm",
           message: "Validation Error",
@@ -109,12 +109,12 @@ class AuthMiddlewares {
             path: __dirname,
           },
           headers: {
-            contentType: req.headers["content-type"],
-            userAgent: req.headers["user-agent"],
+            contentType: req.headers["content-type"] as string,
+            userAgent: req.headers["user-agent"] as string,
           },
           errorIat: new Date().toISOString(),
-          nestedErrors: { errors },
-          stack: undefined,
+          nestedErrors: errors[0],
+          stack: null,
         });
         return next(errorCourier);
       }
@@ -161,9 +161,9 @@ class AuthMiddlewares {
         const errorCourier = new ErrorCourier("Invalid Login", {
           request: {
             id: req.cookies["X-Request-Id"],
-            iat: res.getHeader("X-Request-Date"),
+            iat: res.getHeader("X-Request-Date") as string,
           },
-          session: undefined,
+          session: null,
           type: "Client Error",
           severity: "Warning",
           message: "Authorization Error",
@@ -181,12 +181,12 @@ class AuthMiddlewares {
             path: __dirname,
           },
           headers: {
-            contentType: req.headers["content-type"],
-            userAgent: req.headers["user-agent"],
+            contentType: req.headers["content-type"] as string,
+            userAgent: req.headers["user-agent"] as string,
           },
           errorIat: new Date().toISOString(),
           nestedErrors: null,
-          stack: undefined,
+          stack: null,
         });
         return next(errorCourier);
       }

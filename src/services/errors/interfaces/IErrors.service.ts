@@ -1,9 +1,9 @@
 export default interface IErrorCourier {
   request: {
     id: string;
-    iat: string | number | string[] | undefined;
+    iat: string;
   };
-  session: object | undefined;
+  session: object | null;
   type: string;
   severity: "Error" | "Warning" | "Alarm";
   message: string;
@@ -21,10 +21,10 @@ export default interface IErrorCourier {
     path: string;
   };
   headers: {
-    contentType: string | undefined;
-    userAgent: string | undefined;
+    contentType: string | null;
+    userAgent: string | null;
   };
   errorIat: string;
   nestedErrors: any;
-  stack: string | undefined;
+  stack: string | null;
 }

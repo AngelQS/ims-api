@@ -8,7 +8,7 @@ import cors from "cors";
 import { v4 as uuidv4 } from "uuid";
 
 // Local
-import EnvironmentVariables from "../config/environment-variables";
+import EnvironmentVariables from "../services/config/environment-variables";
 import AuthRoutes from "../routes/auth.routes";
 import IndexRoutes from "../routes/index.routes";
 import PostRoutes from "../routes/post.routes";
