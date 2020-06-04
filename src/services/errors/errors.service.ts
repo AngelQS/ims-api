@@ -9,7 +9,10 @@ export default class ErrorCourier extends Error {
     Error.captureStackTrace(this, this.constructor);
     this.name = this.constructor.name;
     this.errorBody = {
-      requestId: errorBody.requestId,
+      request: {
+        id: errorBody.request.id,
+        iat: errorBody.request.iat,
+      },
       session: errorBody.session,
       type: errorBody.type,
       severity: errorBody.severity,
@@ -31,7 +34,6 @@ export default class ErrorCourier extends Error {
         contentType: errorBody.headers.contentType,
         userAgent: errorBody.headers.userAgent,
       },
-      requestIat: errorBody.requestIat,
       errorIat: errorBody.errorIat,
       nestedErrors: errorBody.nestedErrors,
       stack: this.stack,

@@ -1,6 +1,6 @@
 // Third
 import { Request, Response, NextFunction } from "express";
-import { validationResult } from "express-validator";
+import { validationResult, body } from "express-validator";
 
 // Local
 import BcryptService from "../services/hashing/bcrypt.service";
@@ -57,17 +57,18 @@ class AuthMiddlewares {
         .array({ onlyFirstError: true });
 
       if (errors.length > 0) {
-        // console.log("ERRORS:", errors);
-        console.log("LANZANDO ERROR PERSONALIZADO");
         const errorCourier = new ErrorCourier("Invalid Data", {
-          requestId: req.cookies["X-Request-Id"],
+          request: {
+            id: req.cookies["X-Request-Id"],
+            iat: res.getHeader("X-Request-Date"),
+          },
           session: undefined,
           type: "Client Error",
           severity: "Alarm",
           message: "Validation Error",
           status: {
             code: 403,
-            message: "Invalid Data",
+            message: "Forbidden",
           },
           method: req.method,
           complete: req.complete,
@@ -82,46 +83,13 @@ class AuthMiddlewares {
             contentType: req.headers["content-type"],
             userAgent: req.headers["user-agent"],
           },
-          requestIat: req.headers["X-Request-Date"],
-          errorIat: Date.now().toString(),
+          errorIat: new Date().toString(),
           nestedErrors: { errors },
           stack: undefined,
         });
-        console.log(
-          "MI ERROR PERSONALIZADO:",
-          errorCourier.getError().nestedErrors
-        );
-        throw errorCourier;
-        /* {
-  requestId: "baeb7177-b908-4b7c-ab0d-bd1884ea9bb6",
-  session: "user session that contains user",
-  type: "Client Error",
-  severity: "Error", // Error | Warning | Alarm | Notice (Error, Advertencia, Alarma, Aviso)
-  message: "Signup Failure",
-  status: {
-    code: "500",
-    message: "Invalid request",
-  },
-  method: "POST",
-  complete: true,
-  host: "localhost",
-  originalUrl: "/account/login",
-  secure: true,
-  context: {
-    name: "BcryptService.hashPassword",
-    path: "./src/services/hashing/bcrypt.service.ts"
-  },
-  headers: {
-    contentType: "application/x-www-form-urlencoded",
-    userAgent: "PostmanRuntime/7.24.1",
-  },
-  request-iat: "20:49",
-  error-iat: "20:56",
-  nestedErrors: {name: "Validation", ...}
-  stack: "at /home/angelqs/Documentos/workspace/node/instagram-MERN-stack/src/middlewares/auth.middlewares.ts:57:18",
-} */
+        return next(errorCourier);
       }
-      console.log("PASO EL IF CON MI ERROR");
+
       const { email, password } = req.body;
 
       const user = await User.findOne({ email });
@@ -192,3 +160,44 @@ class AuthMiddlewares {
 const authMiddlewares = new AuthMiddlewares();
 
 export default authMiddlewares;
+
+// ERROR HANDLING
+
+/* export interface IResponse<T> {
+  data: T;
+  error: Error;
+  timestamp: string;
+}
+
+class Reponse<T> {
+  private readonly data: T;
+  private readonly error: Error = null;
+  private readonly timestamp: string = new Date().toISOString();
+
+  constructor(private readonly response: IResponse<T>) {
+
+  }
+
+  getData() {}
+  getError() {}
+  getTimestamp() {}
+  
+}
+
+fn(req, res) {
+  const user = fromDatabase(id);
+  const response = new Response<User>({
+    data: user,
+  })
+  res.json(response);
+}
+
+body,
+headers,
+error: {
+  data: null,
+  error: {
+    error: 'NOT FOUND'
+  },
+  timestamp: string,
+} */

@@ -13,10 +13,11 @@ import AuthRoutes from "../routes/auth.routes";
 import IndexRoutes from "../routes/index.routes";
 import PostRoutes from "../routes/post.routes";
 import UserRoutes from "../routes/user.routes";
+import ErrorMiddlewares from "../middlewares/error.middlewares";
 
 // Initializations
 const { NODE_PORT: PORT } = EnvironmentVariables;
-
+const { errorHandler } = ErrorMiddlewares;
 class Server {
   public app: Application;
 
@@ -38,7 +39,7 @@ class Server {
     // Middlewares
     this.app.use((req: Request, res: Response, next: NextFunction) => {
       res.cookie("X-Request-Id", uuidv4());
-      res.setHeader("X-Request-Date", Date.now().toString());
+      res.setHeader("X-Request-Date", new Date().toString());
       return next();
     });
     this.app.use(express.urlencoded({ extended: false }));
@@ -55,6 +56,9 @@ class Server {
     this.app.use("/", IndexRoutes);
     this.app.use("/posts", PostRoutes);
     this.app.use("/user", UserRoutes);
+
+    // Error Handler
+    this.app.use(errorHandler);
   }
 
   start() {

@@ -77,18 +77,11 @@ class SignUpValidator {
   public getErrorFormater() {
     return function (error: ValidationError) {
       return {
-        type: "CE",
-        name: "Signup Failure",
-        status: {
-          code: null,
-          message: null,
-        },
         location: error.location,
         message: error.msg,
         param: error.param,
         value: error.value,
         nestedErrors: error.nestedErrors,
-        context: null,
       };
     };
   }
