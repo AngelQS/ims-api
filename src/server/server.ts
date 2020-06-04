@@ -39,7 +39,7 @@ class Server {
     // Middlewares
     this.app.use((req: Request, res: Response, next: NextFunction) => {
       res.cookie("X-Request-Id", uuidv4());
-      res.setHeader("X-Request-Date", new Date().toString());
+      res.setHeader("X-Request-Date", new Date().toISOString());
       return next();
     });
     this.app.use(express.urlencoded({ extended: false }));

@@ -25,8 +25,37 @@ class AuthMiddlewares {
         .formatWith(signUpErrorFormater())
         .array({ onlyFirstError: true });
       if (errors.length > 0) {
-        console.log("ERRORS:", errors[0]);
-        throw new Error("Validation Errors");
+        const errorCourier = new ErrorCourier("Invalid Signup", {
+          request: {
+            id: req.cookies["X-Request-Id"],
+            iat: res.getHeader("X-Request-Date"),
+          },
+          session: undefined,
+          type: "Client Error",
+          severity: "Alarm",
+          message: "Validation Error",
+          status: {
+            code: 401,
+            message: "Unauthorized",
+          },
+          method: req.method,
+          complete: req.complete,
+          host: req.hostname,
+          originalUrl: req.originalUrl,
+          secure: req.secure,
+          context: {
+            name: `${AuthMiddlewares.name}.grantUserSignUp`,
+            path: __dirname,
+          },
+          headers: {
+            contentType: req.headers["content-type"],
+            userAgent: req.headers["user-agent"],
+          },
+          errorIat: new Date().toISOString(),
+          nestedErrors: { errors },
+          stack: undefined,
+        });
+        return next(errorCourier);
       }
 
       const userData = req.body;
@@ -57,7 +86,7 @@ class AuthMiddlewares {
         .array({ onlyFirstError: true });
 
       if (errors.length > 0) {
-        const errorCourier = new ErrorCourier("Invalid Data", {
+        const errorCourier = new ErrorCourier("Invalid Login", {
           request: {
             id: req.cookies["X-Request-Id"],
             iat: res.getHeader("X-Request-Date"),
@@ -83,7 +112,7 @@ class AuthMiddlewares {
             contentType: req.headers["content-type"],
             userAgent: req.headers["user-agent"],
           },
-          errorIat: new Date().toString(),
+          errorIat: new Date().toISOString(),
           nestedErrors: { errors },
           stack: undefined,
         });
@@ -127,9 +156,39 @@ class AuthMiddlewares {
   ) {
     try {
       const { authorization } = req.headers;
-      console.log("authorization:", authorization);
+
       if (!authorization) {
-        return res.status(401).json({ error: "You must be logged in" });
+        const errorCourier = new ErrorCourier("Invalid Login", {
+          request: {
+            id: req.cookies["X-Request-Id"],
+            iat: res.getHeader("X-Request-Date"),
+          },
+          session: undefined,
+          type: "Client Error",
+          severity: "Warning",
+          message: "Authorization Error",
+          status: {
+            code: 401,
+            message: "Unauthorized",
+          },
+          method: req.method,
+          complete: req.complete,
+          host: req.hostname,
+          originalUrl: req.originalUrl,
+          secure: req.secure,
+          context: {
+            name: `${AuthMiddlewares.name}.requiresAuthorization`,
+            path: __dirname,
+          },
+          headers: {
+            contentType: req.headers["content-type"],
+            userAgent: req.headers["user-agent"],
+          },
+          errorIat: new Date().toISOString(),
+          nestedErrors: null,
+          stack: undefined,
+        });
+        return next(errorCourier);
       }
       const bearer = authorization.split(" ");
       const token = bearer[1];

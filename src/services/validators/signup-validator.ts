@@ -1,5 +1,5 @@
 // Third
-import { body, ValidationError, validationResult } from "express-validator";
+import { body, ValidationError } from "express-validator";
 
 class SignUpValidator {
   public getValidationChain() {
@@ -86,28 +86,6 @@ class SignUpValidator {
     };
   }
 }
-
-/* formatter: (error) => {
-        return {
-  type: "CE",
-  name: "Signup Failure",
-  location: error.location,
-  message: error.msg,
-  param: error.param,
-  value: error.value,
-  nestedErrors: error.nestedErrors, */
-
-/* function s(error: ValidationError) {
-      return {
-        type: "CE",
-        name: "Signup Failure",
-        location: error.location,
-        message: error.msg,
-        param: error.param,
-        value: error.value,
-        nestedErrors: error.nestedErrors,
-        context: null,
-      }; */
 
 const signUpValidator = new SignUpValidator();
 

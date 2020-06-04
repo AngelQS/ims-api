@@ -44,18 +44,11 @@ class PostValidator {
   public getErrorFormater() {
     return function (error: ValidationError) {
       return {
-        type: "CE",
-        name: "Post Creation Failure",
-        status: {
-          code: null,
-          message: null,
-        },
         location: error.location,
         message: error.msg,
         param: error.param,
         value: error.value,
         nestedErrors: error.nestedErrors,
-        context: null,
       };
     };
   }
