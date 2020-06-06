@@ -36,12 +36,6 @@ class Server {
       return next();
     });
 
-    // Middlewares
-    this.app.use((req: Request, res: Response, next: NextFunction) => {
-      res.cookie("X-Request-Id", uuidv4());
-      res.setHeader("X-Request-Date", new Date().toISOString());
-      return next();
-    });
     this.app.use(express.urlencoded({ extended: false }));
     this.app.use(cookieParser());
     this.app.use(express.json());

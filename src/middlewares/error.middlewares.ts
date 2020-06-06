@@ -16,13 +16,19 @@ class ErrorMiddlewares {
     res: Response,
     next: NextFunction
   ) {
+    console.log("ERROR INSTANCE OF COURIER", err instanceof ErrorCourier);
     const error = err instanceof ErrorCourier ? err.getError() : err;
-    await new Error(error).save();
+
+    if (err instanceof ErrorCourier) {
+      console.log("GUARDANDO ERROR");
+      await new Error(error).save();
+    }
 
     if (ENV === "production") {
       // TODO: Save error on db
       return res.render("some view");
     }
+    console.log("error:", error);
     return res.json({ error });
   }
 }

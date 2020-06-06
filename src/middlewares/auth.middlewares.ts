@@ -24,11 +24,14 @@ class AuthMiddlewares {
       const errors = validationResult(req)
         .formatWith(signUpErrorFormater())
         .array({ onlyFirstError: true });
+      console.log("EL BODY:", req.body);
+      console.log("req.headers:", req.headers);
+
       if (errors.length > 0) {
         const errorCourier = new ErrorCourier("Invalid Signup", {
           request: {
-            id: req.cookies["X-Request-Id"],
-            iat: res.getHeader("X-Request-Date") as string,
+            id: req.headers["ims-request-id"] as string,
+            iat: req.headers["ims-request-date"] as string,
           },
           session: null,
           type: "Client Error",
@@ -88,8 +91,8 @@ class AuthMiddlewares {
       if (errors.length > 0) {
         const errorCourier = new ErrorCourier("Invalid Login", {
           request: {
-            id: req.cookies["X-Request-Id"],
-            iat: res.getHeader("X-Request-Date") as string,
+            id: req.headers["X-Request-Id"] as string,
+            iat: req.headers["X-Request-Date"] as string,
           },
           session: null,
           type: "Client Error",
@@ -156,12 +159,13 @@ class AuthMiddlewares {
   ) {
     try {
       const { authorization } = req.headers;
-
+      console.log("X-Request-ID:", req.headers['X-Request-Id"]']);
+      console.log("X-Request-Date:", req.headers["X-Request-Date"]);
       if (!authorization) {
         const errorCourier = new ErrorCourier("Invalid Login", {
           request: {
-            id: req.cookies["X-Request-Id"],
-            iat: res.getHeader("X-Request-Date") as string,
+            id: req.headers["X-Request-Id"] as string,
+            iat: req.headers["X-Request-Date"] as string,
           },
           session: null,
           type: "Client Error",

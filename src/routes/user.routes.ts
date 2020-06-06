@@ -13,7 +13,7 @@ class UserRoutes {
     // TODO: user routes
   }
 }
-
+  
 const userRoutes = new UserRoutes();
 
 export default userRoutes.router;
