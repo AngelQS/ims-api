@@ -1,6 +1,6 @@
 // Third
 import { Request, Response, NextFunction } from "express";
-import { validationResult, body } from "express-validator";
+import { validationResult } from "express-validator";
 
 // Local
 import BcryptService from "../services/hashing/bcrypt.service";
@@ -24,61 +24,65 @@ class AuthMiddlewares {
       const errors = validationResult(req)
         .formatWith(signUpErrorFormater())
         .array({ onlyFirstError: true });
-      console.log("EL BODY:", req.body);
-      console.log("req.headers:", req.headers);
 
       if (errors.length > 0) {
-        const errorCourier = new ErrorCourier("Invalid Signup", {
-          request: {
-            id: req.headers["ims-request-id"] as string,
-            iat: req.headers["ims-request-date"] as string,
-          },
-          session: null,
-          type: "Client Error",
-          severity: "Alarm",
-          message: "Validation Error",
-          status: {
-            code: 401,
-            message: "Unauthorized",
-          },
-          method: req.method,
-          complete: req.complete,
-          host: req.hostname,
-          originalUrl: req.originalUrl,
-          secure: req.secure,
-          context: {
-            name: `${AuthMiddlewares.name}.grantUserSignUp`,
-            path: __dirname,
-          },
-          headers: {
-            contentType: req.headers["content-type"] as string,
-            userAgent: req.headers["user-agent"] as string,
-          },
-          errorIat: new Date().toISOString(),
-          nestedErrors: errors[0],
-          stack: null,
-        });
-        return next(errorCourier);
+        return res.status(400).json({ error: errors[0].message });
       }
 
       const userData = req.body;
 
-      const userExists = await User.exists({ email: userData.email });
+      const userExists = await User.exists({
+        $or: [{ email: userData.email }, { username: userData.username }],
+      });
 
       if (userExists) {
-        throw new Error("Email entered is already taken");
+        return res
+          .status(400)
+          .json({ error: "Username or email already exist" });
       }
 
       const passwordHashed = BcryptService.hash(userData.password);
+
+      if (!passwordHashed) {
+        return res.status(500).json({ error: "Something went wrong" });
+      }
 
       userData.password = passwordHashed;
 
       const newUser = new User(userData);
 
       await newUser.save();
-      return res.json({ message: "Successfully signed up", user: newUser });
+
+      return res
+        .status(201)
+        .json({ message: "Successfully signed up", user: newUser });
     } catch (err) {
-      return next(err);
+      const error = new ErrorCourier({
+        requestId: req.headers["ims-request-id"] as string,
+        session: null,
+        type: "error",
+        severity: "error",
+        message: "Something went wrong",
+        context: `${AuthMiddlewares.name}.grantUserSignUp`,
+        iat: new Date().toISOString(),
+        petition: {
+          host: req.hostname,
+          originalUrl: req.originalUrl,
+          method: req.method,
+          secure: req.secure,
+          status: {
+            code: 500,
+            message: "Internal Server Error",
+          },
+          headers: {
+            contentType: req.headers["content-type"] as string,
+            userAgent: req.headers["user-agent"] as string,
+          },
+        },
+        nestedErrors: null,
+        stack: err.stack.split("Error: ")[1],
+      }).getError();
+      return next(error);
     }
   }
 
@@ -89,37 +93,7 @@ class AuthMiddlewares {
         .array({ onlyFirstError: true });
 
       if (errors.length > 0) {
-        const errorCourier = new ErrorCourier("Invalid Login", {
-          request: {
-            id: req.headers["X-Request-Id"] as string,
-            iat: req.headers["X-Request-Date"] as string,
-          },
-          session: null,
-          type: "Client Error",
-          severity: "Alarm",
-          message: "Validation Error",
-          status: {
-            code: 403,
-            message: "Forbidden",
-          },
-          method: req.method,
-          complete: req.complete,
-          host: req.hostname,
-          originalUrl: req.originalUrl,
-          secure: req.secure,
-          context: {
-            name: `${AuthMiddlewares.name}.grantUserLogIn`,
-            path: __dirname,
-          },
-          headers: {
-            contentType: req.headers["content-type"] as string,
-            userAgent: req.headers["user-agent"] as string,
-          },
-          errorIat: new Date().toISOString(),
-          nestedErrors: errors[0],
-          stack: null,
-        });
-        return next(errorCourier);
+        return res.status(400).json({ error: errors[0].message });
       }
 
       const { email, password } = req.body;
@@ -127,7 +101,7 @@ class AuthMiddlewares {
       const user = await User.findOne({ email });
 
       if (!user) {
-        throw new Error("Email entered does not exist");
+        return res.status(400).json({ error: "Email or password are wrong" });
       }
 
       const userPassword = user.get("password");
@@ -135,20 +109,50 @@ class AuthMiddlewares {
       const validPassword = await BcryptService.compare(password, userPassword);
 
       if (!validPassword) {
-        throw new Error("Invalid user password");
+        return res.status(400).json({ error: "Email or password are wrong" });
       }
 
       const userPayload = {
         _id: user.get("_id"),
+        firstname: user.get("firstname"),
+        lastname: user.get("lastname"),
         email: user.get("email"),
       };
 
       const userToken = await JsonWebTokenService.sign(userPayload);
 
+      if (!userToken) {
+        return res.status(500).json({ error: "Something went wrong" });
+      }
+
       return res.json({ message: "Successfully loged in", token: userToken });
     } catch (err) {
-      res.json({ message: `${err}` });
-      return next(err);
+      const error = new ErrorCourier({
+        requestId: req.headers["ims-request-id"] as string,
+        session: null,
+        type: "error",
+        severity: "error",
+        message: "Something went wrong",
+        context: `${AuthMiddlewares.name}.grantUserSignUp`,
+        iat: new Date().toISOString(),
+        petition: {
+          host: req.hostname,
+          originalUrl: req.originalUrl,
+          method: req.method,
+          secure: req.secure,
+          status: {
+            code: 500,
+            message: "Internal Server Error",
+          },
+          headers: {
+            contentType: req.headers["content-type"] as string,
+            userAgent: req.headers["user-agent"] as string,
+          },
+        },
+        nestedErrors: null,
+        stack: err.stack.split("Error: ")[1],
+      }).getError();
+      return next(error);
     }
   }
 
@@ -159,40 +163,8 @@ class AuthMiddlewares {
   ) {
     try {
       const { authorization } = req.headers;
-      console.log("X-Request-ID:", req.headers['X-Request-Id"]']);
-      console.log("X-Request-Date:", req.headers["X-Request-Date"]);
       if (!authorization) {
-        const errorCourier = new ErrorCourier("Invalid Login", {
-          request: {
-            id: req.headers["X-Request-Id"] as string,
-            iat: req.headers["X-Request-Date"] as string,
-          },
-          session: null,
-          type: "Client Error",
-          severity: "Warning",
-          message: "Authorization Error",
-          status: {
-            code: 401,
-            message: "Unauthorized",
-          },
-          method: req.method,
-          complete: req.complete,
-          host: req.hostname,
-          originalUrl: req.originalUrl,
-          secure: req.secure,
-          context: {
-            name: `${AuthMiddlewares.name}.requiresAuthorization`,
-            path: __dirname,
-          },
-          headers: {
-            contentType: req.headers["content-type"] as string,
-            userAgent: req.headers["user-agent"] as string,
-          },
-          errorIat: new Date().toISOString(),
-          nestedErrors: null,
-          stack: null,
-        });
-        return next(errorCourier);
+        return res.status(401).json({ error: "Authorization required" });
       }
       const bearer = authorization.split(" ");
       const token = bearer[1];
@@ -200,7 +172,7 @@ class AuthMiddlewares {
       const decoded = await JsonWebTokenService.verify(token);
 
       if (!decoded) {
-        return res.json({ error: "You must be logged in" });
+        return res.status(401).json({ error: "You must be logged in" });
       }
 
       const { _id } = decoded;
@@ -208,14 +180,39 @@ class AuthMiddlewares {
       const user = await User.findById(_id);
 
       if (!user) {
-        return res.json({ error: "User not found" });
+        return res.status(400).json({ error: "User not found" });
       }
 
       res.locals.bearer.user = user;
 
       return next();
     } catch (err) {
-      return next(err);
+      const error = new ErrorCourier({
+        requestId: req.headers["ims-request-id"] as string,
+        session: null,
+        type: "error",
+        severity: "error",
+        message: "Something went wrong",
+        context: `${AuthMiddlewares.name}.requiresAuthorization`,
+        iat: new Date().toISOString(),
+        petition: {
+          host: req.hostname,
+          originalUrl: req.originalUrl,
+          method: req.method,
+          secure: req.secure,
+          status: {
+            code: 500,
+            message: "Internal Server Error",
+          },
+          headers: {
+            contentType: req.headers["content-type"] as string,
+            userAgent: req.headers["user-agent"] as string,
+          },
+        },
+        nestedErrors: null,
+        stack: err.stack.split("Error: ")[1],
+      }).getError();
+      return next(error);
     }
   }
 }
@@ -223,44 +220,3 @@ class AuthMiddlewares {
 const authMiddlewares = new AuthMiddlewares();
 
 export default authMiddlewares;
-
-// ERROR HANDLING
-
-/* export interface IResponse<T> {
-  data: T;
-  error: Error;
-  timestamp: string;
-}
-
-class Reponse<T> {
-  private readonly data: T;
-  private readonly error: Error = null;
-  private readonly timestamp: string = new Date().toISOString();
-
-  constructor(private readonly response: IResponse<T>) {
-
-  }
-
-  getData() {}
-  getError() {}
-  getTimestamp() {}
-  
-}
-
-fn(req, res) {
-  const user = fromDatabase(id);
-  const response = new Response<User>({
-    data: user,
-  })
-  res.json(response);
-}
-
-body,
-headers,
-error: {
-  data: null,
-  error: {
-    error: 'NOT FOUND'
-  },
-  timestamp: string,
-} */
