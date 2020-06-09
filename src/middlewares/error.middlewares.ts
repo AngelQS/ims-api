@@ -20,7 +20,6 @@ class ErrorMiddlewares {
     if (ENV === "production") {
       return res.render("some view");
     }
-    console.log(err);
     return res.status(500).json({ error: "Something went wrong" });
   }
 }

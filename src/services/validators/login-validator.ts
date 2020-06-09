@@ -8,7 +8,7 @@ class LogInValidator {
         .exists({ checkNull: true, checkFalsy: true })
         .withMessage("Email is a required field")
         .isString()
-        .withMessage("Email field only must contain alphabetic characters")
+        .withMessage("Email field only must contain alphabetical characters")
         .trim()
         .not()
         .isEmpty({ ignore_whitespace: true })
@@ -19,8 +19,8 @@ class LogInValidator {
       body("password")
         .exists({ checkNull: true, checkFalsy: true })
         .withMessage("Password is a required field")
-        .isAlphanumeric("sr-RS@latin")
-        .withMessage("Password field only must contain alphanumeric characters")
+        .isAscii()
+        .withMessage("Password field must contain ascii characters")
         .trim()
         .not()
         .isEmpty({ ignore_whitespace: true })
@@ -33,11 +33,11 @@ class LogInValidator {
         .withMessage("Password field must contain at least 1 number")
         .matches(/([a-z]){1,}/)
         .withMessage(
-          "Password field must contain at least 1 lowercase alphabetic character"
+          "Password field must contain at least 1 lowercase alphabetical character"
         )
         .matches(/([A-Z]){1,}/)
         .withMessage(
-          "Password field must contain at least 1 uppercase alphabetic character"
+          "Password field must contain at least 1 uppercase alphabetical character"
         ),
     ];
   }

@@ -124,7 +124,6 @@ class AuthMiddlewares {
       if (!userToken) {
         return res.status(500).json({ error: "Something went wrong" });
       }
-
       return res.json({ message: "Successfully loged in", token: userToken });
     } catch (err) {
       const error = new ErrorCourier({
