@@ -5,10 +5,9 @@ import cookieParser from "cookie-parser";
 import compression from "compression";
 import helmet from "helmet";
 import cors from "cors";
-import { v4 as uuidv4 } from "uuid";
+import { config as dotenv } from "dotenv";
 
 // Local
-import EnvironmentVariables from "../services/config/environment-variables";
 import AuthRoutes from "../routes/auth.routes";
 import IndexRoutes from "../routes/index.routes";
 import PostRoutes from "../routes/post.routes";
@@ -16,8 +15,8 @@ import UserRoutes from "../routes/user.routes";
 import ErrorMiddlewares from "../middlewares/error.middlewares";
 
 // Initializations
-const { NODE_PORT: PORT } = EnvironmentVariables;
 const { errorHandler } = ErrorMiddlewares;
+
 class Server {
   public app: Application;
 
@@ -25,10 +24,11 @@ class Server {
     this.app = express();
     this.config();
     this.routes();
+    dotenv();
   }
 
   protected config(): void {
-    this.app.set("port", PORT);
+    this.app.set("port", process.env.NODE_PORT);
 
     // Global variables
     this.app.use((req: Request, res: Response, next: NextFunction) => {

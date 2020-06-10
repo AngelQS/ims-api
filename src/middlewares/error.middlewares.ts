@@ -2,12 +2,13 @@
 import { Request, Response, NextFunction } from "express";
 
 // Local
-import EnvironmentVariables from "../services/config/environment-variables";
 import ErrorCourier from "../services/errors/errors.service";
 import Error from "../models/Error";
+import { configService } from "../services/config/config.service";
+import { CONFIG_SYMBOLS } from "../services/config/config.constants";
 
 // Initializations
-const { NODE_ENV: ENV } = EnvironmentVariables;
+const ENV = configService.get(CONFIG_SYMBOLS.NODE_ENV);
 
 class ErrorMiddlewares {
   public async errorHandler(

@@ -2,10 +2,11 @@
 import mongoose from "mongoose";
 
 // Local
-import EnvironmentVariables from "../services/config/environment-variables";
+import { configService } from "../services/config/config.service";
+import { CONFIG_SYMBOLS } from "../services/config/config.constants";
 
 // Initializations
-const { MONGODB_URI: URI } = EnvironmentVariables;
+const URI = configService.get(CONFIG_SYMBOLS.DATABASE_URI);
 
 class MakeDatabase {
   start() {
