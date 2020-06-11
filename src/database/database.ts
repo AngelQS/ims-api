@@ -6,7 +6,7 @@ import { configService } from "../services/config/config.service";
 import { CONFIG_SYMBOLS } from "../services/config/config.constants";
 
 // Initializations
-const URI = configService.get(CONFIG_SYMBOLS.DATABASE_URI);
+const URI = configService.getProperty(CONFIG_SYMBOLS.DATABASE_URI);
 
 class MakeDatabase {
   start() {

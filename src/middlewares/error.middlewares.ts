@@ -8,7 +8,7 @@ import { configService } from "../services/config/config.service";
 import { CONFIG_SYMBOLS } from "../services/config/config.constants";
 
 // Initializations
-const ENV = configService.get(CONFIG_SYMBOLS.NODE_ENV);
+const ENV = configService.getProperty(CONFIG_SYMBOLS.NODE_ENV);
 
 class ErrorMiddlewares {
   public async errorHandler(

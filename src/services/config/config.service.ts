@@ -7,16 +7,18 @@ import { Container } from "../../global/global.container";
 import { IJson } from "../../global/global.interfaces";
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import { Mapper } from "../../helpers/mapper.helpers";
 
-class ConfigService {
-  private readonly configMapper = new Container<Symbol>();
+// Initializations
+const ENV = process.env.NODE_ENV;
 
-  constructor(readonly configSymbols: IJson<Symbol> = CONFIG_SYMBOLS) {
+class ConfigService extends Mapper {
+  constructor(
+    protected readonly mapper: Container<Symbol> = new Container<Symbol>(),
+    private readonly configSymbols: IJson<Symbol> = CONFIG_SYMBOLS
+  ) {
+    super(mapper);
     this.init();
-  }
-
-  public get<T>(symbol: symbol): T {
-    return this.configMapper.get(symbol);
   }
 
   private init() {
@@ -24,24 +26,14 @@ class ConfigService {
   }
 
   private setupEnvironmentVariables() {
-    const ENV = process.env.NODE_ENV;
-    console.log("ENV??:", ENV);
-    let envVars: IJson;
-    if (ENV === "production") {
-      envVars = process.env;
-    }
-    const pathToFile = process.cwd();
-    const filename = `.${ENV}.env`;
-    envVars = parse(readFileSync(resolve(pathToFile, filename)));
-    envVars = Object.entries(envVars);
-    const configSym = Object.entries(this.configSymbols);
-    envVars.forEach(([key, value]: [string, string]) => {
-      configSym.forEach(([_key, _value]) => {
-        if (key === _key) {
-          this.configMapper.set(_value, value);
-        }
-      });
-    });
+    let envs: IJson;
+    envs = // Environment variables
+      ENV === "production"
+        ? process.env
+        : parse(readFileSync(resolve(process.cwd(), `.${ENV}.env`)));
+    const vars = Object.entries(envs);
+    const symbols = Object.entries(this.configSymbols);
+    this.mapOut(vars, symbols);
   }
 }
 
