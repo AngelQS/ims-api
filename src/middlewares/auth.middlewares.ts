@@ -44,7 +44,7 @@ class AuthMiddlewares {
       const passwordHashed = BcryptService.hash(userData.password);
 
       if (!passwordHashed) {
-        return res.status(500).json({ error: "Something went wrong" });
+        return res.status(500).json({ error: "Something went wrong1" });
       }
 
       userData.password = passwordHashed;
@@ -62,7 +62,7 @@ class AuthMiddlewares {
         session: null,
         type: "error",
         severity: "error",
-        message: "Something went wrong",
+        message: "Something went wrong2",
         context: `${AuthMiddlewares.name}.grantUserSignUp`,
         iat: new Date().toISOString(),
         petition: {
@@ -122,7 +122,7 @@ class AuthMiddlewares {
       const userToken = await JsonWebTokenService.sign(userPayload);
 
       if (!userToken) {
-        return res.status(500).json({ error: "Something went wrong" });
+        return res.status(500).json({ error: "Something went wrong3" });
       }
       return res.json({ message: "Successfully loged in", token: userToken });
     } catch (err) {
@@ -131,7 +131,7 @@ class AuthMiddlewares {
         session: null,
         type: "error",
         severity: "error",
-        message: "Something went wrong",
+        message: "Something went wrong4",
         context: `${AuthMiddlewares.name}.grantUserSignUp`,
         iat: new Date().toISOString(),
         petition: {
@@ -191,7 +191,7 @@ class AuthMiddlewares {
         session: null,
         type: "error",
         severity: "error",
-        message: "Something went wrong",
+        message: "Something went wrong5",
         context: `${AuthMiddlewares.name}.requiresAuthorization`,
         iat: new Date().toISOString(),
         petition: {

@@ -24,21 +24,7 @@ class LogInValidator {
         .trim()
         .not()
         .isEmpty({ ignore_whitespace: true })
-        .withMessage("Password field must be not empty")
-        .isLength({ min: 8 })
-        .withMessage("Password field must be at least 8 characters")
-        .isLength({ max: 72 })
-        .withMessage("Password field must be at max 30 characters")
-        .matches(/\d{1,}/)
-        .withMessage("Password field must contain at least 1 number")
-        .matches(/([a-z]){1,}/)
-        .withMessage(
-          "Password field must contain at least 1 lowercase alphabetical character"
-        )
-        .matches(/([A-Z]){1,}/)
-        .withMessage(
-          "Password field must contain at least 1 uppercase alphabetical character"
-        ),
+        .withMessage("Password field must be not empty"),
     ];
   }
 

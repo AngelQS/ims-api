@@ -8,13 +8,13 @@ class SignUpValidator {
         .exists({ checkNull: true, checkFalsy: true })
         .withMessage("Names are required files")
         .isString()
-        .withMessage("Names fields only must contain alphabetic characters")
+        .withMessage("Names fields only must contain alphabetical characters")
         .trim()
         .not()
         .isEmpty({ ignore_whitespace: true })
         .withMessage("Names fields must not be empty")
         .matches(/[a-zA-Z]/)
-        .withMessage("Names fields only must contain alphabetic characters")
+        .withMessage("Names fields only must contain alphabetical characters")
         .isLength({ min: 2 })
         .withMessage("Names fields must be at least 2 characters")
         .isLength({ max: 50 })
@@ -31,14 +31,14 @@ class SignUpValidator {
         .withMessage("Username field must not be empty")
         .isLength({ min: 2 })
         .withMessage("Username field must be at least 2 characters")
-        .isLength({ max: 30 })
-        .withMessage("Username field must be at max 30 characters"),
+        .isLength({ max: 50 })
+        .withMessage("Username field must be at max 50 characters"),
 
       body("email")
         .exists({ checkNull: true, checkFalsy: true })
         .withMessage("Email is a required field")
         .isString()
-        .withMessage("Email field only must contain alphabetic characters")
+        .withMessage("Email field only must contain alphabetical characters")
         .trim()
         .not()
         .isEmpty({ ignore_whitespace: true })
@@ -63,11 +63,11 @@ class SignUpValidator {
         .withMessage("Password field must contain at least 1 number")
         .matches(/([a-z]){1,}/)
         .withMessage(
-          "Password field must contain at least 1 lowercase alphabetic character"
+          "Password field must contain at least 1 lowercase alphabetical character"
         )
         .matches(/([A-Z]){1,}/)
         .withMessage(
-          "Password field must contain at least 1 uppercase alphabetic character"
+          "Password field must contain at least 1 uppercase alphabetical character"
         )
         .custom((value, { req }) => value === req.body.passwordConfirmation)
         .withMessage("Passwords must match"),
