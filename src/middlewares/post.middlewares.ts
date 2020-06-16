@@ -167,6 +167,34 @@ class PostMiddlewares {
       console.log("Error:", err);
     }
   }
+
+  public async deleteAPost(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { _id: postId } = req.params;
+
+      const { _id: userId } = res.locals.bearer.user;
+
+      const post = await Post.findOne({ _id: postId }).populate(
+        "postedBy",
+        "_id "
+      );
+
+      if (!post) {
+        return Error("Post not found");
+      }
+
+      if (post.get("postedBy")._id.toString() === userId.toString()) {
+        await post.remove();
+      }
+
+      return res.json({
+        message: "Successfully deleted",
+        post: { _id: postId },
+      });
+    } catch (err) {
+      console.log("Error:", err);
+    }
+  }
 }
 
 const postMiddlewares = new PostMiddlewares();

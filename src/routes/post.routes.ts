@@ -15,6 +15,7 @@ const {
   likeToAPost,
   unlikeToAPost,
   commentAPost,
+  deleteAPost,
 } = PostMiddlewares;
 const { getValidationChain: postValidationChain } = PostValidator;
 
@@ -28,6 +29,7 @@ class PostRoutes {
 
   routes() {
     this.router.get("/", requiresAuthorization, getAllPosts);
+    //.status(422)
     this.router.post(
       "/",
       requiresAuthorization,
@@ -38,6 +40,7 @@ class PostRoutes {
     this.router.put("/like", requiresAuthorization, likeToAPost);
     this.router.put("/unlike", requiresAuthorization, unlikeToAPost);
     this.router.put("/comment", requiresAuthorization, commentAPost);
+    this.router.delete("/comment/:_id", requiresAuthorization, deleteAPost);
   }
 }
 
