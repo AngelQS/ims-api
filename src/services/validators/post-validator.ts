@@ -8,8 +8,8 @@ class PostValidator {
         .optional({ nullable: true })
         .exists({ checkNull: true, checkFalsy: true })
         .withMessage("Title field are required")
-        .isAscii()
-        .withMessage("Tittle field must contain ascii characters")
+        .isString()
+        .withMessage("Title field only must contain characters")
         .trim()
         .not()
         .isEmpty({ ignore_whitespace: true })
@@ -23,8 +23,8 @@ class PostValidator {
         .optional({ nullable: true })
         .exists({ checkNull: true, checkFalsy: true })
         .withMessage("Body field is required")
-        .isAscii()
-        .withMessage("Body field must contain ascii characters")
+        .isString()
+        .withMessage("Body field only must contain characters")
         .trim()
         .not()
         .isEmpty({ ignore_whitespace: true })
@@ -35,7 +35,6 @@ class PostValidator {
         .withMessage("Body field must be at max 500 characters"),
 
       body("photo")
-        .optional({ nullable: true })
         .exists({ checkNull: true, checkFalsy: true })
         .withMessage("Photo is a required field"),
     ];

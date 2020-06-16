@@ -28,6 +28,7 @@ class PostRoutes {
       createPost
     );
     this.router.get("/myposts", requiresAuthorization, getUserOwnPosts);
+    this.router.put("/like", requiresAuthorization);
   }
 }
 

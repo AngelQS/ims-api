@@ -18,7 +18,7 @@ class PostMiddlewares {
 
       if (errors.length > 0) {
         console.log("ERRORS:", errors[0]);
-        throw new Error("Validation Errors");
+        return Error("Validation Errors");
       }
 
       if (!res.locals.bearer.user) {
@@ -33,7 +33,7 @@ class PostMiddlewares {
 
       postData.postedBy = res.locals.bearer.user;
 
-      const newPost = await new Post(postData);
+      const newPost = new Post(postData);
 
       await newPost.save();
 
@@ -87,6 +87,54 @@ class PostMiddlewares {
       return res.json({ post: userOwnPosts });
     } catch (err) {
       return next(err);
+    }
+  }
+
+  public async likeToAPost(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { _id: userId } = res.locals.bearer.user;
+
+      const { _id: postId } = req.body;
+
+      const post = await Post.findByIdAndUpdate(
+        postId,
+        { $push: { likes: userId } },
+        { new: true }
+      );
+
+      if (!post) {
+        return Error("Post not found to set a like");
+      }
+
+      return res
+        .status(422)
+        .json({ message: "Success assign like to a post", post });
+    } catch (err) {
+      console.log("ERROR on LIKE");
+    }
+  }
+
+  public async unlikeToAPost(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { _id: userId } = res.locals.bearer.user;
+
+      const { _id: postId } = req.body;
+
+      const post = await Post.findByIdAndUpdate(
+        postId,
+        { $push: { likes: userId } },
+        { new: true }
+      );
+
+      if (!post) {
+        return Error("Post not found to unlike the post");
+      }
+
+      return res
+        .status(422)
+        .json({ message: "Success assign unlike to a post", post });
+    } catch (err) {
+      console.log("ERROR on UNLIKE");
     }
   }
 }
