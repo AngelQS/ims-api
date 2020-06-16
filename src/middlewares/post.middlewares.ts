@@ -46,10 +46,9 @@ class PostMiddlewares {
 
   public async getAllPosts(req: Request, res: Response, next: NextFunction) {
     try {
-      const posts = await Post.find({}).populate(
-        "postedBy",
-        "_id name email createdAt updatedAt "
-      );
+      const posts = await Post.find({})
+        .populate("postedBy", "_id name email createdAt updatedAt ")
+        .populate("comments.postedBy", "_id username");
 
       if (!posts) {
         return Error("Unable to get all posts on PostMiddlewares.getAllPosts");
@@ -155,17 +154,15 @@ class PostMiddlewares {
         postId,
         { $push: { comments: newComment } },
         { new: true }
-      ).populate("comments.postedBy", "_id username");
+      )
+        .populate("comments.postedBy", "_id username")
+        .populate("postedBy", "_id username");
 
       if (!post) {
         return Error("Post not found to set a like");
       }
 
-      return (
-        res
-          //.status(422)
-          .json({ message: "Success assign like to a post", post })
-      );
+      return res.json({ message: "Success assign like to a post", post });
     } catch (err) {
       console.log("Error:", err);
     }
