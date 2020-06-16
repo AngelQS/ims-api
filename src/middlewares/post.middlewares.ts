@@ -106,11 +106,13 @@ class PostMiddlewares {
         return Error("Post not found to set a like");
       }
 
-      return res
-        .status(422)
-        .json({ message: "Success assign like to a post", post });
+      return (
+        res
+          //.status(422)
+          .json({ message: "Success assign like to a post", post })
+      );
     } catch (err) {
-      console.log("ERROR on LIKE");
+      console.log("Error on unlike:", err);
     }
   }
 
@@ -122,7 +124,7 @@ class PostMiddlewares {
 
       const post = await Post.findByIdAndUpdate(
         postId,
-        { $push: { likes: userId } },
+        { $pull: { likes: userId } },
         { new: true }
       );
 
@@ -130,11 +132,42 @@ class PostMiddlewares {
         return Error("Post not found to unlike the post");
       }
 
-      return res
-        .status(422)
-        .json({ message: "Success assign unlike to a post", post });
+      return (
+        res
+          //.status(422)
+          .json({ message: "Success assign unlike to a post", post })
+      );
     } catch (err) {
-      console.log("ERROR on UNLIKE");
+      console.log("Error on unlike:", err);
+    }
+  }
+
+  public async commentAPost(req: Request, res: Response, next: NextFunction) {
+    try {
+      const newComment = {
+        text: req.body.text,
+        postedBy: res.locals.bearer.user._id,
+      };
+
+      const { _id: postId } = req.body;
+
+      const post = await Post.findByIdAndUpdate(
+        postId,
+        { $push: { comments: newComment } },
+        { new: true }
+      ).populate("comments.postedBy", "_id username");
+
+      if (!post) {
+        return Error("Post not found to set a like");
+      }
+
+      return (
+        res
+          //.status(422)
+          .json({ message: "Success assign like to a post", post })
+      );
+    } catch (err) {
+      console.log("Error:", err);
     }
   }
 }

@@ -8,7 +8,14 @@ import PostValidator from "../services/validators/post-validator";
 
 // Initializations
 const { requiresAuthorization } = AuthMiddlewares;
-const { createPost, getAllPosts, getUserOwnPosts } = PostMiddlewares;
+const {
+  createPost,
+  getAllPosts,
+  getUserOwnPosts,
+  likeToAPost,
+  unlikeToAPost,
+  commentAPost,
+} = PostMiddlewares;
 const { getValidationChain: postValidationChain } = PostValidator;
 
 class PostRoutes {
@@ -28,7 +35,9 @@ class PostRoutes {
       createPost
     );
     this.router.get("/myposts", requiresAuthorization, getUserOwnPosts);
-    this.router.put("/like", requiresAuthorization);
+    this.router.put("/like", requiresAuthorization, likeToAPost);
+    this.router.put("/unlike", requiresAuthorization, unlikeToAPost);
+    this.router.put("/comment", requiresAuthorization, commentAPost);
   }
 }
 

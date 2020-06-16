@@ -125,7 +125,11 @@ class AuthMiddlewares {
       if (!userToken) {
         return res.status(500).json({ error: "Something went wrong3" });
       }
-      return res.json({ message: "Successfully logged in", token: userToken, user: user.get('username') });
+      return res.json({
+        message: "Successfully logged in",
+        token: userToken,
+        user: { username: user.get("username"), _id: user.get("_id") },
+      });
     } catch (err) {
       const error = new ErrorCourier({
         requestId: req.headers["ims-request-id"] as string,

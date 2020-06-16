@@ -14,6 +14,7 @@ class MakeDatabase {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useCreateIndex: true,
+      useFindAndModify: false
     });
 
     mongoose.connection.on("connected", () => {
